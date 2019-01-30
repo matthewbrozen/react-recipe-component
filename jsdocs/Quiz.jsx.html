@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>DocStrap Source: Quiz.jsx</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.spacelab.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">DocStrap</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Answer.html">Answer</a></li><li><a href="AnswerResult.html">AnswerResult</a></li><li><a href="Question.html">Question</a></li><li><a href="Quiz.html">Quiz</a></li><li><a href="Score.html">Score</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: Quiz.jsx</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">import React from 'react';
+import PropTypes from 'prop-types';
+import Question from './Question';
+import Score from './Score';
+
+/**
+ * Represents a quiz as a list of {@link Question}s.
+ *
+ * It keeps track of which answers are given and the user's score.
+ *
+ * Upon completion it calls props.onComplete, passing back an object with:
+ * answersCorrect: an array of booleans, indicating which answers were correct,
+ * answersIndex: an array of the answer indexs given,
+ * answersScore: an array of the scores awarded for each question,
+ * current: the index of the currently displayed question (zero based)
+ * currentMax: the maximum possible score the user could have got so far
+ * score: a numeric total score - it may be greater than the total questions if any answers were scored higher than 1,
+ * scoreMax: the maximum possible score, getting the best answer for each question,
+ * totalCorrect: the number of correct answers given, awarding 1 per answer, regardless of score the answer carries
+ * totalQuestions: the total number of available questions
+ */
+class Quiz extends React.Component {
+    constructor(props) {
+        super(props);
+        // Get the max scores
+        const scoresMax = this.calculateScoreMax();
+        // Initialize state
+        this.state = {
+            mode: 'questions',
+            answersCorrect: [],
+            answersIndex: [],
+            answersScore: [],
+            answersMax: scoresMax.answersMax,
+            current: 0,
+            currentMax: 0,
+            score: 0,
+            scoreMax: scoresMax.scoreMax,
+            totalCorrect: 0,
+            totalQuestions: this.props.questions.length
+        };
+        // Bind this
+        this.handleQuestion = this.handleQuestion.bind(this);
+        this.handleComplete = this.handleComplete.bind(this);
+    }
+
+    /**
+     * Calculate the highest possible score for the quiz
+     * and the highest possible score for each question.
+     *
+     * If answers don't have a score, 
+     * they'll be assumed to be worth zero,
+     * unless the question's correctIndex matches their index,
+     * in which case it will be assumed to be worth 1.
+     *
+     * @returns {object}
+     */
+    calculateScoreMax() {
+        let answersMax = [];
+        let scoreMax = 0;
+        // Loop over each question
+        this.props.questions.forEach((question, questionIndex) => {
+            // We have to start with a non number
+            // as starting with zero would return 0 as the max score
+            // for a question with all negative scores
+            let questionScoreMax = null;
+            // Loop over each answer
+            question.answers.forEach((answer, answerIndex) => {
+                let thisScore = 0;
+                // If the answer has a score, use it
+                if (typeof answer.score === 'number') {
+                    thisScore = answer.score;
+                } else if ((typeof question.correctIndex === 'number') &amp;&amp; (question.correctIndex === answerIndex)) {
+                    // If the answer is the "correct" one
+                    thisScore = 1;
+                }
+                // If the score is the current highest known score for the question
+                if ((questionScoreMax === null) || (thisScore > questionScoreMax)) {
+                    questionScoreMax = thisScore;
+                }
+            });
+            // Store the max score
+            answersMax[questionIndex] = questionScoreMax;
+            scoreMax += questionScoreMax;
+        });
+        return {
+            answersMax: answersMax,
+            scoreMax: scoreMax
+        };
+    }
+
+    /**
+     * Calculate the current total number of correct answers.
+     *
+     * If values are passed, it calculates relative to them.
+     * If no values are passed, it gets them from the state object.
+     * This allows calculating before asynchronously updating state.
+     *
+     * @returns {number}
+     * @param {number} current The index of the current question. If undefined, defaults to this.state.current.
+     * @param {array} answersCorrect The array of booleans for whether answers so far are correct. If undefined, defaults to this.state.answersCorrect.
+     */
+    calculateCurrentTotalCorrect(current, answersCorrect) {
+        if (typeof current !== 'number') {
+            current = this.state.current;
+        }
+        if (typeof current !== 'number') {
+            current = -1;
+        }
+        if (Array.isArray(answersCorrect) == false) {
+            answersCorrect = this.state.answersCorrect;
+        }
+        let total = 0;
+        for (let i = 0; i &lt;= current; i += 1) {
+            if (answersCorrect[i] === true) {
+                total += 1;
+            }
+        }
+        return total;
+    }
+
+    /**
+     * Calculate the maximum score the user could currently have by adding up the highest scoring answer for each completed question (ignoring the current).
+     *
+     * If values are passed, it calculates relative to them.
+     * If no values are passed, it gets them from the state object.
+     * This allows calculating before asynchronously updating state.
+     *
+     * @returns {number}
+     * @param {number} current The index of the current question. If undefined, defaults to this.state.current.
+     */
+    calculateCurrentMax(current) {
+        if (typeof current !== 'number') {
+            current = this.state.current;
+        }
+        if (typeof current !== 'number') {
+            current = -1;
+        }
+        let total = 0;
+        for (let i = 0; i &lt;= current; i += 1) {
+            if (typeof this.state.answersMax[i] === 'number') {
+                total += this.state.answersMax[i];
+            }
+        }
+        return total;
+    }
+
+    /**
+     * Calculate the current total score.
+     *
+     * Note: This may be different to calculateCurrentTotalCorrect
+     * as some questions may be scored more or less than 1.
+     *
+     * If values are passed, it calculates relative to them.
+     * If no values are passed, it gets them from the state object.
+     * This allows calculating before asynchronously updating state.
+     *
+     * @returns {number}
+     * @param {number} current The index of the current question. If undefined, defaults to this.state.current.
+     * @param {array} answerScore The array of scores so far recorded. If undefined, defaults to this.state.answerScore.
+     */
+    calculateCurrentTotalScore(current, answerScore) {
+        if (typeof current !== 'number') {
+            current = this.state.current;
+        }
+        if (typeof current !== 'number') {
+            current = -1;
+        }
+        if (Array.isArray(answerScore) == false) {
+            answerScore = this.state.answerScore;
+        }
+        let total = 0;
+        for (let i = 0; i &lt;= current; i += 1) {
+            if (typeof answerScore[i] === 'number') {
+                total += answerScore[i];
+            }
+        }
+        return total;
+    }
+
+    /**
+     * Return a clone of the state object.
+     *
+     * As a clone, it's safe to modify without messing with the core state.
+     *
+     * @returns {object}
+     */
+    getState() {
+        return JSON.parse(JSON.stringify(this.state));
+    }
+
+    /**
+     * Set the mode to 'complete'
+     * and fire the props.onComplete callback if there is one.
+     *
+     * @returns {undefined}
+     */
+    handleComplete() {
+        this.setState(
+            {
+                mode: 'complete'
+            },
+            () => {
+                // If there is an onComplete callback
+                if (typeof this.props.onComplete === 'function') {
+                    // Call it with details of the quiz results
+                    this.props.onComplete(this.getState());
+                }
+            }
+        );
+    }
+
+    /**
+     * Handle a question being answered,
+     * recording the result.
+     *
+     * Fire the onAnswer callback if there is one.
+     *
+     * @returns {undefined}
+     * @param {number} questionIndex The index of the question just answered.
+     * @param {number} answerIndex The index of the answer within that question.
+     * @param {boolean} isCorrect Optional true if the answer was the correct one.
+     * @param {number} answerScore Optional score assigned to the answer.
+     */
+    handleQuestion(questionIndex, answerIndex, isCorrect, answerScore) {
+        let newState = this.state;
+        // Default isCorrect if it's not set
+        // by assuming any positive numeric answerScore is 'correct'
+        if (typeof isCorrect !== 'boolean') {
+            if ((typeof answerScore === 'number') &amp;&amp; (answerScore > 0)) {
+                isCorrect = true;
+            } else {
+                isCorrect = false;
+            }
+        }
+        // Default answerScore if it's not set
+        if (typeof answerScore !== 'number') {
+            if (isCorrect === true) {
+                answerScore = 1;
+            } else {
+                answerScore = 0;
+            }
+        }
+        
+        // Update all of the state values
+        newState.answersCorrect[questionIndex] = isCorrect;
+        newState.answersIndex[questionIndex] = answerIndex;
+        newState.answersScore[questionIndex] = answerScore;
+        newState.current = questionIndex + 1;
+        newState.currentMax = this.calculateCurrentMax(questionIndex);
+        newState.score = this.calculateCurrentTotalScore(questionIndex, newState.answersScore);
+        newState.totalCorrect = this.calculateCurrentTotalCorrect(questionIndex, newState.answersCorrect);
+
+        // Store the new state
+        this.setState(
+            newState, 
+            () => {
+                // If there is an onAnswer callback, fire it
+                if (typeof this.props.onAnswer === 'function') {
+                    this.props.onAnswer(this.getState());
+                }
+                // If we've just finished the last question
+                if (this.state.current >= this.state.totalQuestions) {
+                    // Complete
+                    this.handleComplete();
+                }
+            }
+        );
+    }
+
+    /**
+     * Render the questions up to and including the current one.
+     * @returns {JSX}
+     */
+    renderQuestions() {
+        const quiz = this;
+        const props = this.props;
+        if (typeof this.state.current !== 'number') {
+            return null;
+        }
+        return (
+            &lt;div className='quiz__questions'>
+                {
+                    this.props.questions.map((question, index) => {
+                        // Bail if we're not up to this question yet
+                        if ((typeof quiz.state.current !== 'number') || (index > quiz.state.current)) {
+                            return null;
+                        }
+                        // Determine if this is the current question
+                        let isCurrent = false;
+                        if (index === quiz.state.current) {
+                            isCurrent = true;
+                        }
+                        // Handle children being non JSX, converting strings or arrays of strings into JSX paragraphs
+                        if (typeof question.children === 'string') {
+                            question.children = (&lt;p>{question.children}&lt;/p>);
+                        } else if (Array.isArray(question.children) === true) {
+                            question.children = question.children.map((child, index) => {
+                                if (typeof child !== 'string') {
+                                    return null;
+                                }
+                                return (&lt;p key={'child--' + index}>{child}&lt;/p>);
+                            });
+                        }
+                        // Build and return the JSX
+                        return (
+                            &lt;Question
+                                key={'question--' + index}
+                                answers={question.answers}
+                                answerResults={question.answerResults}
+                                buttonTextAnswer={question.buttonTextAnswer || props.buttonTextAnswer || undefined}
+                                buttonTextAnswerResult={question.buttonTextAnswerResult || props.buttonTextAnswerResult || undefined}
+                                buttonTextSelect={question.buttonTextSelect || props.buttonTextSelect || undefined}
+                                correctIndex={question.correctIndex}
+                                index={index}
+                                isCurrent={isCurrent}
+                                onComplete={quiz.handleQuestion}
+                            >
+                                {question.children}
+                            &lt;/Question>
+                        );
+                    })
+                }
+            &lt;/div>
+        );
+    }
+
+    /**
+     * Render the quiz
+     * @returns {JSX}
+     */
+    render() {
+        return (
+            &lt;div className={'quiz quiz--' + this.state.mode}>
+                &lt;Score
+                    current={this.state.current}
+                    currentMax={this.state.currentMax}
+                    score={this.state.score}
+                    scoreMax={this.state.scoreMax}
+                    totalCorrect={this.state.totalCorrect}
+                    totalQuestions={this.state.totalQuestions}
+                />
+                {this.props.children}
+                {this.renderQuestions()}
+            &lt;/div>
+        );
+    }
+}
+
+/**
+ * @prop {string} buttonTextAnswer Optional text to display as a button on the bottom of each answer. Should generally be something like 'Pick' or 'Choose'
+ * @prop {string} buttonTextAnswerResult Optional text to display as a button after any answerResult. Should generally be something like 'Continue', 'Next' or 'Finish' if a final question.
+ * @prop {string} buttonTextSelect Optional text to display as a button users need to click to select/lock in their choice of answer and see the result/continue.
+ * @prop {function} children The JSX for any preamble.
+ * @prop {function} onAnswer Callback function to fire whenever an answer is given. Will be passed a clone of the state object.
+ * @prop {function} onComplete Callback function to fire when complete. Will be passed a clone of the state object.
+ * @prop {array.&lt;object>} questions The array of properties to pass to the {@link Question}.
+ */
+Quiz.propTypes = {
+    buttonTextAnswer: PropTypes.string,
+    buttonTextAnswerResult: PropTypes.string,
+    buttonTextSelect: PropTypes.string,
+    children: PropTypes.func,
+    onAnswer: PropTypes.func,
+    onComplete: PropTypes.func,
+    questions: PropTypes.array.isRequired
+};
+
+export default Quiz;</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	Mirum
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+	
+		on Tue Aug 21st 2018
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>
