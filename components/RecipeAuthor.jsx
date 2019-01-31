@@ -5,11 +5,9 @@ class RecipeAuthor extends React.Component {
     render() {
         const {author} = this.props;
         return (
-            <div>
-                <div className="recipeAuthor">
-                    <div><h5> by: </h5></div>
-                    <div><h4 author={author}> { this.props.author }</h4></div>
-                </div>
+            <div className="recipeAuthor">
+                <h5 className="recipeAuthor-by"> Recipe by: </h5>
+                <h4 author={author} className="recipeAuthor-author"> { this.props.author }</h4>
             </div>
         );
     }

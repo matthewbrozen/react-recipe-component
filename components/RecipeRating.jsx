@@ -5,22 +5,20 @@ class RecipeRating extends React.Component {
     render() {
 
         return (
-            <div>
-                <div className="recipeRating">
-                    <form>
-                        <input type="radio" name="optradio" checked />
+            <div className="recipeRating">
+                <form className="recipeRating-form">
+                    <input type="radio" className="recipeRating-form_input1" name="optradio" checked />
 
-                        <input type="radio" name="optradio" />
+                    <input type="radio" className="recipeRating-form_input2" name="optradio" />
 
-                        <input type="radio" name="optradio" />
+                    <input type="radio" className="recipeRating-form_input3" name="optradio" />
 
-                        <input type="radio" name="optradio" />
+                    <input type="radio" className="recipeRating-form_input4" name="optradio" />
 
-                        <input type="radio" name="optradio" />
-                    </form>
+                    <input type="radio" className="recipeRating-form_input5" name="optradio" />
+                </form>
 
-                    <div>709 reviews</div>
-                </div>
+                <div className="recipeRating-form_numberOfreivews">709 reviews</div>
             </div>
         );
     }

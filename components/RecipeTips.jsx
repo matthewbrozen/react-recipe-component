@@ -7,15 +7,13 @@ class RecipeTips extends React.Component {
         const {tip2} = this.props;
         const {tip3} = this.props;
         return (
-            <div>
-                <div className="recipeTips">
-                    <h4> Pro Tips:</h4>
-                    <ol>
-                        <li tip1={tip1}> {this.props.tip1} </li>
-                        <li tip2={tip2}> {this.props.tip2}</li>
-                        <li tip3={tip3}> {this.props.tip3}</li>
-                    </ol>
-                </div>
+            <div className="recipeTips">
+                <h4 className="recipeTips-title"> Pro Tips:</h4>
+                <ol className="recipeTips-list">
+                    <li tip1={tip1} className="recipeTips-tip1"> {this.props.tip1} </li>
+                    <li tip2={tip2} className="recipeTips-tip2"> {this.props.tip2}</li>
+                    <li tip3={tip3} className="recipeTips-tip3"> {this.props.tip3}</li>
+                </ol>
             </div>
         );
     }

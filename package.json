@@ -1,6 +1,6 @@
 {
   "name": "react-recipe-component",
-  "version": "4.3.0",
+  "version": "6.2.0",
   "description": "Reusable recipe module for React.",
   "repository": {
     "type": "git"

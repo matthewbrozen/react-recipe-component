@@ -5,10 +5,8 @@ class RecipeCategory extends React.Component {
     render() {
         const {title} = this.props;
         return (
-            <div>
-                <div className="recipeTitle">
-                    <h1 title={title}> {this.props.title}</h1>
-                </div>
+            <div className="recipeTitle">
+                <h1 title={title} className="recipeTitle-title"> {this.props.title}</h1>
             </div>
         );
     }

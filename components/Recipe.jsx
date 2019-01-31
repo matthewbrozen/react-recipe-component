@@ -15,6 +15,7 @@ import RecipeTips from './RecipeTips';
 import RecipeNutrition from './RecipeNutrition';
 import RecipeReviews from './RecipeReviews';
 import RecipeAccredidation from './RecipeAccredidation';
+import RecipeRelated from './RecipeRelated';
 
 class Recipe extends React.Component {
     render() {
@@ -50,8 +51,20 @@ class Recipe extends React.Component {
         const {tip2} = this.props;
         const {tip3} = this.props;
         const {description} = this.props;
+        const {social1} = this.props;
+        const {social2} = this.props;
+        const {social3} = this.props;
+        const {social4} = this.props;
+        const {social5} = this.props;
+        const {related1} = this.props;
+        const {related2} = this.props;
+        const {related3} = this.props;
+        const {related1Title} = this.props;
+        const {related2Title} = this.props;
+        const {related3Title} = this.props;
+
         return (
-            <div>
+            <div classname="recipeContainer">
                 <RecipeCategory 
                     bread1={bread1} 
                     bread2={bread2} 
@@ -63,7 +76,13 @@ class Recipe extends React.Component {
                     title={title}
                 />
 
-                <RecipeSocial />
+                <RecipeSocial 
+                    social1={social1}
+                    social2={social2}
+                    social3={social3}
+                    social4={social4}
+                    social5={social5}
+                />
 
                 <RecipeDate 
                     date={date}
@@ -138,6 +157,15 @@ class Recipe extends React.Component {
 
                 <RecipeSpacer 
                     spacer={spacer}
+                />
+
+                <RecipeRelated 
+                    related1={related1}
+                    related2={related2}
+                    related3={related3}
+                    related1Title={related1Title}
+                    related2Title={related2Title}
+                    related3Title={related3Title}
                 />
 
                 <RecipeReviews />

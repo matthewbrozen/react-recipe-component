@@ -1,47 +1,37 @@
 import React from 'react';
 
 
-class RecipeNutrition extends React.Component {
+class RecipeRelated extends React.Component {
     render() {
 
+        const {related1} = this.props;
+        const {related2} = this.props;
+        const {related3} = this.props;
+        const {related1Title} = this.props;
+        const {related2Title} = this.props;
+        const {related3Title} = this.props;
+
         return (
-            <div>
-                <div className="recipeRelated">
-                    <h4> Similar Recipes</h4>
-                    <div>
-                        <img className='similar1' src='https://www.kevinandamanda.com/whatsnew/wp-content/uploads/2012/04/spicy-sausage-pasta-16b-340x340.jpg'></img>
-                        <h5> Three Cheese Pasta</h5>
-                        <div>*</div>
-                        <div>*</div>
-                        <div>*</div>
-                        <div>*</div>
-                        <div>*</div>
-                        <div>709 reviews</div>
-                    </div>
-                    <div>
-                        <img className='similar2' src='http://baliindiancuisine.com/wp-content/uploads/2014/12/Indian-fast-food-recipes.jpg'></img>
-                        <h5> Cheesy Chicken Florentine</h5>
-                        <div>*</div>
-                        <div>*</div>
-                        <div>*</div>
-                        <div>*</div>
-                        <div>*</div>
-                        <div>251 reviews</div>
-                    </div>
-                    <div>
-                        <img className='similar3' src='https://lifemadesweeter.com/wp-content/uploads/Instant-Pot-Beef-Stew-Recipe-Photo-Recipe-1-of-1-12-e1507849409918-500x375.jpg'></img>
-                        <h5> Chicken Florentne Unstuffed Pasta Shells</h5>
-                        <div>*</div>
-                        <div>*</div>
-                        <div>*</div>
-                        <div>*</div>
-                        <div>*</div>
-                        <div>467 reviews</div>
-                    </div>
+            <div className="recipeRelated">
+                <h4 className="recipeRelated-title"> Similar Recipes</h4>
+                <div className="recipeRelated-related1">
+                    <img className="recipeRelated-related1_image" src={related1}></img>
+                    <h5 related1Title={related1Title} className="recipeRelated-related1_title"> {this.props.related1Title}</h5>
+                    <div className="recipeRelated-related1_rating"> ***** 800 Reviews</div>
+                </div>
+                <div className="recipeRelated-related2">
+                    <img className="recipeRelated-related2_image" src={related2}></img>
+                    <h5 related2Title={related2Title} className="recipeRelated-related2_title"> {this.props.related2Title}</h5>
+                    <div className="recipeRelated-related2_rating"> ***** 800 Reviews</div>
+                </div>
+                <div className="recipeRelated-related3">
+                    <img className="recipeRelated-related3_image" src={related3}></img>
+                    <h5 related3Title={related3Title} className="recipeRelated-related3_title"> {this.props.related3Title}</h5>
+                    <div className="recipeRelated-related3_rating"> ***** 800 Reviews</div>
                 </div>
             </div>
         );
     }
 }
 
-export default RecipeNutrition;
+export default RecipeRelated;

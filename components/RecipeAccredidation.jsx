@@ -5,11 +5,9 @@ class RecipeAccredidation extends React.Component {
         const {accredidationSrc} = this.props;
         const {accredidationParagraph} = this.props;
         return (
-            <div>
-                <div className="recipeAccredidation">
-                    <img src={accredidationSrc}></img>
-                    <p accredidationParagraph={accredidationParagraph}>{this.props.accredidationParagraph}</p>
-                </div>
+            <div className="recipeAccredidation">
+                <img src={accredidationSrc} className="recipeAccredidation-accredidationSrc"></img>
+                <p accredidationParagraph={accredidationParagraph} className="recipeAccredidation-accredidationParagraph">{this.props.accredidationParagraph}</p>
             </div>
         );
     }
